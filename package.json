@@ -1,0 +1,19 @@
+{
+  "name": "init-react-reflux-workflow",
+  "version": "0.0.1",
+  "devDependencies": {
+    "browserify": "~10.2.3",
+    "gulp": "^3.9.0",
+    "gulp-notify": "^2.2.0",
+    "gulp-streamify": "0.0.5",
+    "gulp-uglify": "^1.2.0",
+    "gulp-util": "^3.0.5",
+    "gulp-webserver": "^0.9.1",
+    "react": "~0.13.3",
+    "react-router": "~0.13.3",
+    "reactify": "~1.1.1",
+    "reflux": "~0.2.7",
+    "vinyl-source-stream": "^1.1.0",
+    "watchify": "~3.2.1"
+  }
+}
