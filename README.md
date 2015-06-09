@@ -1,4 +1,4 @@
-React-jwt
+React-jwt example
 ---
 
 ### Usage
