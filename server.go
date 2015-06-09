@@ -33,7 +33,7 @@ func main() {
 		// Run this on all requests
 		// Should be moved to a proper middleware
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Authorization")
 		c.Next()
 	})
 	router.OPTIONS("/*cors", func(c *gin.Context) {
@@ -59,7 +59,6 @@ func main() {
 			token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
 			tokenString, err := token.SignedString([]byte(mySigningKey))
 			if err != nil {
-				fmt.Println(err)
 				c.JSON(200, gin.H{"code": 500, "msg": "Server error!"})
 				return
 			}
@@ -68,9 +67,30 @@ func main() {
 			c.JSON(200, gin.H{"code": 400, "msg": "Error username or password!"})
 		}
 	})
-	//router.POST("/user/logout", func(c *gin.Context) {
 
-	//})
+	router.POST("/user/balance", func(c *gin.Context) {
+		token, err := jwt.ParseFromRequest(c.Request, func(token *jwt.Token) (interface{}, error) {
+			b := ([]byte(mySigningKey))
+			return b, nil
+		})
+		fmt.Println(err)
+		if err != nil {
+			c.JSON(200, gin.H{"code": 403, "msg": err.Error()})
+		} else {
+			if token.Valid {
+				token.Claims["balance"] = 49
+				tokenString, err := token.SignedString([]byte(mySigningKey))
+				if err != nil {
+					c.JSON(200, gin.H{"code": 500, "msg": "Server error!"})
+					return
+				}
+
+				c.JSON(200, gin.H{"code": 200, "msg": "OK", "jwt": tokenString})
+			} else {
+				c.JSON(200, gin.H{"code": 401, "msg": "Sorry, you are not validate"})
+			}
+		}
+	})
 
 	router.Run(":3001")
 }
