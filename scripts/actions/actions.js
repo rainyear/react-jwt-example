@@ -7,7 +7,8 @@ var actions = Reflux.createActions({
   "login": {},
   "updateProfile": {},
   "loginError": {},
-  "logout": {}
+  "logout": {},
+  "getBalance": {asyncResult: true}
 });
 
 
@@ -30,4 +31,22 @@ actions.login.listen(function(data){
   })
 
 });
+actions.getBalance.listen(function(){
+  var jwt = localStorage.getItem('jwt');
+  req({
+    url: HOST+"/user/balance",
+    method: "post",
+    type: "json",
+    headers: {
+      'Authorization': "Bearer "+jwt,
+    },
+    success: function (resp) {
+      if (resp.code == 200) {
+        actions.updateProfile(resp.jwt);
+      }else{
+        actions.loginError(resp.msg);
+      }
+    }
+  })
+})
 module.exports = actions;

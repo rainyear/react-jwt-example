@@ -17,6 +17,7 @@ var BS = require('react-bootstrap');
 
 var App = React.createClass({
   mixins:[
+    Router.Navigation,
     Reflux.listenTo(userStore, 'onLoginSucc'),
   ],
   onLoginSucc: function (user) {
@@ -25,17 +26,19 @@ var App = React.createClass({
     })
   },
   getInitialState: function() {
-    console.log('getInitialState');
     return {
       user: userStore.getDefaultUser(),
     };
+  },
+  getProfile: function () {
+    this.transitionTo("profile");
   },
   render: function () {
     var navItems;
     if (this.state.user.logd) {
       navItems = (
         <BS.Nav right>
-          <BS.NavItem href='#/profile'>{this.state.user.name}</BS.NavItem>
+          <BS.NavItem href="#/profile">{this.state.user.name}</BS.NavItem>
           <BS.NavItem onClick={actions.logout}>Logout</BS.NavItem>
         </BS.Nav>
       );
