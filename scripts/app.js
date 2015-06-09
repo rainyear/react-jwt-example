@@ -1,27 +1,63 @@
 var React       = require('react');
+var Reflux      = require('reflux');
 var Router      = require('react-router');
 var HelloWorld  = require('./components/HelloWorld.js');
 var Home        = require('./views/home.js');
-var About       = require('./views/about.js');
+var Login       = require('./views/login.js');
+var Profile     = require('./views/profile.js');
 
 var Route           = Router.Route;
 var RouteHandler    = Router.RouteHandler;
 var DefaultRoute    = Router.DefaultRoute;
 var Link            = Router.Link;
 
+var userStore = require('./stores/userStore');
+var actions   = require('./actions/actions');
+var BS = require('react-bootstrap');
 
 var App = React.createClass({
+  mixins:[
+    Reflux.listenTo(userStore, 'onLoginSucc'),
+  ],
+  onLoginSucc: function (user) {
+    this.setState({
+      user: user,
+    })
+  },
+  getInitialState: function() {
+    console.log('getInitialState');
+    return {
+      user: userStore.getDefaultUser(),
+    };
+  },
   render: function () {
+    var navItems;
+    if (this.state.user.logd) {
+      navItems = (
+        <BS.Nav right>
+          <BS.NavItem href='#/profile'>{this.state.user.name}</BS.NavItem>
+          <BS.NavItem onClick={actions.logout}>Logout</BS.NavItem>
+        </BS.Nav>
+      );
+    }else{
+      navItems = (
+        <BS.Nav right>
+          <BS.NavItem href="#/login">Login</BS.NavItem>
+        </BS.Nav>
+      );
+    }
     return (
       <div className="App">
-        <nav>
-          <ul>
-            <li><Link to="home">Home</Link></li>
-            <li><Link to="about">About</Link></li>
-          </ul>
-        </nav>
-        <HelloWorld />
-        <RouteHandler />
+        <BS.Navbar brand={<Link to="home">React-jwt</Link>} inverse>
+          { navItems }
+        </BS.Navbar>
+        <BS.Row className='show-grid'>
+          <BS.Col xs={6} md={4}></BS.Col>
+          <BS.Col xs={6} md={4}>
+            <RouteHandler />
+          </BS.Col>
+          <BS.Col xs={6} md={4}></BS.Col>
+        </BS.Row>
       </div>
       );
   }
@@ -30,7 +66,8 @@ var App = React.createClass({
 var routes = (
     <Route handler={ App }>
       <DefaultRoute name="home" handler={ Home } />
-      <Route name="about" path="/about" handler={ About } />
+      <Route name="login" path="/login" handler={ Login } />
+      <Route name="profile" path="/profile" handler={ Profile } />
     </Route>
 );
 Router.run(routes, function(Handler) {

@@ -4,12 +4,28 @@ rainy @ 2015-06-08 <me@rainy.im>
 */
 package main
 
-import "github.com/gin-gonic/gin"
+import (
+	"fmt"
+	"time"
 
-type Login struct {
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
+)
+
+type User struct {
 	Name string `json: "name"`
+	Mail string `json: "mail"`
 	Pass string `json: "pass"`
 }
+type Login struct {
+	Name string `json: "name" binding: "required"`
+	Pass string `json: "pass" binding: "required"`
+}
+
+var (
+	validUser    = User{Name: "rainy", Mail: "me@rainy.im", Pass: "123"}
+	mySigningKey = "USEHERE"
+)
 
 func main() {
 	router := gin.Default()
@@ -26,8 +42,31 @@ func main() {
 
 	router.POST("/user/token", func(c *gin.Context) {
 		var login Login
-		c.Bind(&login)
-		c.JSON(200, gin.H{"code": 200, "msg": "OK"})
+		val := c.Bind(&login)
+		if !val {
+			c.JSON(200, gin.H{"code": 401, "msg": "Both name & password are required"})
+			return
+		}
+		if login.Name == validUser.Name && login.Pass == validUser.Pass {
+			token := jwt.New(jwt.SigningMethodHS256)
+			// Headers
+			token.Header["alg"] = "HS256"
+			token.Header["typ"] = "JWT"
+
+			// Claims
+			token.Claims["name"] = validUser.Name
+			token.Claims["mail"] = validUser.Mail
+			token.Claims["exp"] = time.Now().Add(time.Hour * 72).Unix()
+			tokenString, err := token.SignedString([]byte(mySigningKey))
+			if err != nil {
+				fmt.Println(err)
+				c.JSON(200, gin.H{"code": 500, "msg": "Server error!"})
+				return
+			}
+			c.JSON(200, gin.H{"code": 200, "msg": "OK", "jwt": tokenString})
+		} else {
+			c.JSON(200, gin.H{"code": 400, "msg": "Error username or password!"})
+		}
 	})
 	//router.POST("/user/logout", func(c *gin.Context) {
 
