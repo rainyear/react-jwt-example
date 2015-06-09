@@ -19,5 +19,5 @@ gulp
 ```go
 go get github.com/dgrijalva/jwt-go
 go get github.com/gin-gonic/gin
-go run server
+go run server.go
 ```
